@@ -1,8 +1,49 @@
+#pragma once
 
+#define BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
+
+// Touchscreen connection:
+#define Y1 A3  // need two analog inputs
+#define X1 A2  // 
+#define Y2 9   // 
+#define X2 8   //
+
+int16_t PTR_COL = 0; // LCD cursor pointer
+int16_t PTR_ROW = 0;
+int16_t TS_COL = 0; // TOUCHSCREEN(TS) detected value
+int16_t TS_ROW = 0;
+
+// TS calibration
+uint16_t ROW_F = 110; // TS first row
+uint16_t ROW_L = 920; // TS last row
+uint16_t COL_F = 110; // TS first column
+uint16_t COL_L = 930; // TS last column
+
+uint8_t  FONT_SIZE  = 3; // font size
+uint16_t FRGD_COLOR = GREEN; // foreground color
+uint16_t BKG_COLOR  = BLACK; // background color
+
+
+void BD_as_input(void) {
+    DDRD = DDRD & 0x03;// Pins 7-2 as input, no change for pins 1,0 (RX TX)
+    DDRB = DDRB & 0xFC; // Pins 8-9 as input
+}
+
+void BD_as_output(void) {
+    DDRD = DDRD | 0xFC;// Pins 7-2 as output, no change for pins 1,0 (RX TX)
+    DDRB = DDRB | 0x03;// Pins 8-9 as output
+}
 
 void lcdWrite(uint8_t d) {
     PORTC = PORTC & 0xFD; // WR 0    // ILI9341 reads data pins when WR rises from LOW to HIGH (A1 pin on arduino)
-    PORTD = (PORTD & 0x03) | ((d) & 0xFC); // data pins of ILI9341 connected to two arduino ports 
+    PORTD = (PORTD & 0x03) | ((d) & 0xFC); // data pins of ILI9341 connected to two arduino ports
     PORTB = (PORTB & 0xFC) | ((d) & 0x03);
     PORTC = PORTC | 0x02; // WR 1
 }
@@ -30,15 +71,6 @@ uint8_t lcdRead(void) {
     return pin72 | pin10;
 }
 
-void BD_as_input(void) {
-    DDRD = DDRD & 0x03;// Pins 7-2 as input, no change for pins 1,0 (RX TX)
-    DDRB = DDRB & 0xFC; // Pins 8-9 as input
-}
-
-void BD_as_output(void) {
-    DDRD = DDRD | 0xFC;// Pins 7-2 as output, no change for pins 1,0 (RX TX)
-    DDRB = DDRB | 0x03;// Pins 8-9 as output
-}
 
 void lcd_init(void) {
     PORTC = PORTC | 0x10; // 1  // LCD_RESET 1 - 0 - 1, arduino pin A4
@@ -137,28 +169,6 @@ void lcdClear(byte color) {
         PORTC = wr0;
         PORTC = wr1;
     }
-}
-
-void displayInteger(int16_t n) {
-    String str = String(n);
-    byte l = str.length();
-    char b[l + 1]; // +1 for the null terminator
-    str.toCharArray(b, l + 1);
-    for(int n = 0; n < l; n++)
-        displayChar(b[n]);
-}
-
-void displayString(String str) {
-    byte l = str.length();
-    char b[l + 1]; // +1 for the null terminator
-    str.toCharArray(b, l + 1);
-    for(int n = 0; n < l; n++) {
-        displayChar(b[n]);
-    }
-}
-
-void displayCharArray(const char* a) {
-    displayString(String(a));
 }
 
 void displayChar(char znak) {
@@ -320,6 +330,29 @@ void displayChar(char znak) {
         }
     }
     PTR_COL += FONT_SIZE * 6;
+}
+
+
+void displayInteger(int16_t n) {
+    String str = String(n);
+    byte l = str.length();
+    char b[l + 1]; // +1 for the null terminator
+    str.toCharArray(b, l + 1);
+    for(int n = 0; n < l; n++)
+        displayChar(b[n]);
+}
+
+void displayString(String str) {
+    byte l = str.length();
+    char b[l + 1]; // +1 for the null terminator
+    str.toCharArray(b, l + 1);
+    for(int n = 0; n < l; n++) {
+        displayChar(b[n]);
+    }
+}
+
+void displayCharArray(const char* a) {
+    displayString(String(a));
 }
 
 void displayClearChar(byte n) {

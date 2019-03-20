@@ -21,37 +21,9 @@
  D (digital pins 0 to 7)   0 1 are RX TX, don't use
 */
 
-#define BLACK   0x0000
-#define BLUE    0x001F
-#define RED     0xF800
-#define GREEN   0x07E0
-#define CYAN    0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW  0xFFE0
-#define WHITE   0xFFFF
+#include "commands.h"
 
-// Touchscreen connection:
-#define Y1 A3  // need two analog inputs
-#define X1 A2  // 
-#define Y2 9   // 
-#define X2 8   //
-
-int16_t PTR_COL = 0; // LCD cursor pointer
-int16_t PTR_ROW = 0;
-int16_t TS_COL = 0; // TOUCHSCREEN(TS) detected value
-int16_t TS_ROW = 0;
-
-// TS calibration
-uint16_t ROW_F = 110; // TS first row
-uint16_t ROW_L = 920; // TS last row
-uint16_t COL_F = 110; // TS first column
-uint16_t COL_L = 930; // TS last column
-
-uint8_t  FONT_SIZE  = 3; // font size
-uint16_t FRGD_COLOR = GREEN; // foreground color
-uint16_t BKG_COLOR  = BLACK; // background color
-
-byte readTouch(void) {
+byte readTouch() {
     //Y1 A3
     //X1 A2
     //Y2 9
@@ -68,8 +40,7 @@ byte readTouch(void) {
         digitalWrite(X2, LOW);
 
         touch = !digitalRead(Y1); // 0 - touched
-        if (touch)
-        {
+        if (touch) {
             //delay(5);
             digitalWrite(X1, HIGH);   // X variant A
             //digitalWrite(X2, HIGH);   // X variant B
@@ -197,8 +168,7 @@ uint16_t KEYPAD_COL[]  =
 
 uint16_t D_COL, D_ROW;
 
-void setup()
-{
+void setup(void) {
     //  Serial.begin(9600);
     BD_as_output(); // Set pins 1-8 as output
     DDRC = DDRC | B00011111;// Set pins A0-A4 as output
@@ -207,10 +177,10 @@ void setup()
     lcdClear(BLACK);
 
     BKG_COLOR = BLACK;
-    FRGD_COLOR = GREEN;
-    
+    FRGD_COLOR = WHITE;
+
     lcdRect(0, 0, 320, 240, BKG_COLOR); // clear whole screen, slow
-    
+
     for (int i = 0; i < 12; i++) { // draw a keypad
         PTR_COL = KEYPAD_COL[i];
         PTR_ROW = KEYPAD_ROW[i];
@@ -223,8 +193,8 @@ void setup()
     D_ROW = 10;
 }
 
-void loop()
-{
+void loop(void) {
+
     if(!readTouch()) return;
 
     for (int i = 0; i < 12; i++)
